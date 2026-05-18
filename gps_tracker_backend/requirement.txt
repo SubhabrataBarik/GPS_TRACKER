@@ -1,0 +1,12 @@
+django
+djangorestframework
+django-cors-headers
+channels
+channels-redis
+daphne
+djangorestframework-simplejwt
+python-dotenv 
+psycopg2-binary
+django-phonenumber-field
+phonenumbers
+Pillow
