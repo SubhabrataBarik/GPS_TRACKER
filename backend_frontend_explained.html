@@ -1,0 +1,330 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{display:flex;flex-direction:column;gap:0;font-family:var(--font-sans)}
+.tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:0}
+.tab{padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent}
+.tab.active{color:var(--color-text-primary);border-bottom:2px solid #7F77DD}
+.body{display:flex;min-height:460px}
+.sidebar{width:200px;border-right:0.5px solid var(--color-border-tertiary);padding:8px 0;background:var(--color-background-secondary);flex-shrink:0}
+.sitem{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);border-left:2px solid transparent;transition:all .12s}
+.sitem:hover{color:var(--color-text-primary);background:var(--color-background-primary)}
+.sitem.active{color:#3C3489;background:#EEEDFE;border-left:2px solid #7F77DD;font-weight:500}
+.sitem.active .dot{background:#7F77DD}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-secondary);flex-shrink:0;transition:background .12s}
+.detail{flex:1;padding:20px 24px;overflow:auto}
+.d-icon{width:40px;height:40px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.d-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.d-title{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.d-subtitle{font-size:12px;color:var(--color-text-secondary);font-family:var(--font-mono)}
+.section{margin-bottom:16px}
+.sec-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin-bottom:6px}
+.pill-row{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;padding:3px 10px;border-radius:99px;font-family:var(--font-mono)}
+.pill-p{background:#EEEDFE;color:#3C3489}
+.pill-t{background:#E1F5EE;color:#085041}
+.pill-a{background:#FAEEDA;color:#633806}
+.pill-r{background:#FCEBEB;color:#791F1F}
+.why-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;font-size:13px;line-height:1.6;color:var(--color-text-primary);border-left:3px solid #7F77DD;border-radius:0;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.connects{display:flex;flex-wrap:wrap;gap:6px}
+.conn-chip{font-size:11px;padding:3px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);color:var(--color-text-secondary);background:var(--color-background-primary)}
+.resp-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.resp-list li{font-size:13px;color:var(--color-text-primary);display:flex;gap:8px;line-height:1.5}
+.resp-list li::before{content:"→";color:#7F77DD;flex-shrink:0;font-weight:500}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--color-text-tertiary);font-size:13px;padding:40px}
+</style>
+
+<h2 class="sr-only">Interactive explainer for each Django backend app and React frontend component in the GPS tracker system</h2>
+
+<div class="wrap">
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('backend',this)"><i class="ti ti-server" aria-hidden="true"></i> Django apps</button>
+  <button class="tab" onclick="switchTab('frontend',this)"><i class="ti ti-brand-react" aria-hidden="true"></i> React components</button>
+</div>
+<div class="body">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="detail" id="detail">
+    <div class="empty-state"><i class="ti ti-hand-click" style="font-size:28px" aria-hidden="true"></i><span>Select any item to see explanation</span></div>
+  </div>
+</div>
+</div>
+
+<script>
+const data = {
+backend: [
+  {
+    id:'accounts',
+    label:'accounts/',
+    icon:'ti-user',
+    iconBg:'#EEEDFE',iconColor:'#3C3489',
+    path:'apps/accounts/',
+    tagType:'pill-p',
+    purpose:'Manages who can use the system — parent registration, login, and child profiles.',
+    why:'Every request to the API must be authenticated. Without this app, anyone could read any child\'s location. It\'s the security gate of the entire system. It also defines the data model that all other apps reference: "whose child is this device tracking?"',
+    responsibilities:[
+      'Register a parent with phone + password',
+      'Login and issue JWT access + refresh tokens',
+      'Store Child profiles linked to each parent',
+      'Protect all API routes via JWT middleware',
+    ],
+    keyFiles:['models.py — Parent (custom user), Child','views.py — RegisterView, LoginView','serializers.py — ParentSerializer, ChildSerializer','urls.py — /api/auth/register/, /api/auth/login/'],
+    connects:['devices (device belongs to a child)','alerts (alerts belong to a child)','tracking (location history filtered by parent)'],
+    pillClass:'pill-p',
+  },
+  {
+    id:'devices',
+    label:'devices/',
+    icon:'ti-device-mobile',
+    iconBg:'#E1F5EE',iconColor:'#085041',
+    path:'apps/devices/',
+    tagType:'pill-t',
+    purpose:'Manages the physical GPS hardware — registration, authentication, and the endpoint the device POSTs location to.',
+    why:'The hardware device (ESP32 + SIM800) needs somewhere to send data every 30 seconds. This app is that endpoint. It also authenticates the device using an API key (not JWT — devices don\'t "log in" like humans do) and links each device to a child profile.',
+    responsibilities:[
+      'Store each device record (device_id, api_key, status)',
+      'Authenticate hardware via X-API-Key header',
+      'Receive GPS payload from hardware (DeviceIngestView)',
+      'Update last_seen timestamp on each ping',
+      'Pass location to tracking app for broadcast',
+    ],
+    keyFiles:['models.py — Device model','views.py — DeviceIngestView (hardware calls this), DeviceListView','serializers.py — DeviceSerializer','urls.py — /api/devices/ingest/ (hardware endpoint)'],
+    connects:['accounts (device → child → parent)','tracking (passes location to broadcast)','alerts (triggers geofence checks)'],
+    pillClass:'pill-t',
+  },
+  {
+    id:'tracking',
+    label:'tracking/',
+    icon:'ti-map-pin',
+    iconBg:'#FAEEDA',iconColor:'#633806',
+    purpose:'The heart of the system. Stores every location point and pushes live updates to the parent app via WebSocket.',
+    why:'HTTP alone is not enough for live tracking. If the parent app had to "ask" the server every 30 seconds for a new location, that\'s polling — wasteful and slow. WebSocket keeps a persistent connection open so the moment a new GPS point arrives from the hardware, it\'s pushed to the parent\'s map instantly. This is what makes it feel live.',
+    responsibilities:[
+      'Store Location records (lat, lon, battery, timestamp)',
+      'Maintain WebSocket connection per device (consumers.py)',
+      'Push new location to the parent app the instant it arrives',
+      'Serve location history for route replay',
+      'Separate "group" per device_id in Redis channel layer',
+    ],
+    keyFiles:['models.py — Location model','consumers.py — TrackingConsumer (WebSocket handler)','routing.py — ws/tracking/<device_id>/','views.py — LocationHistoryView','urls.py — /api/tracking/<id>/history/'],
+    connects:['devices (receives location from DeviceIngestView)','alerts (location passed to geofence checker)','React useWebSocket hook (client end of the WS)'],
+    pillClass:'pill-a',
+  },
+  {
+    id:'alerts',
+    label:'alerts/',
+    icon:'ti-bell',
+    iconBg:'#FCEBEB',iconColor:'#791F1F',
+    purpose:'Detects when something important happens — child leaves a safe zone, SOS button pressed, device enters school.',
+    why:'Raw location data is useless to a parent at work. They don\'t want to stare at a map. Alerts convert continuous location data into meaningful events: "Your child left school" or "SOS pressed at 3:45pm." Geofences define the safe zones; this app watches every incoming location and fires when a boundary is crossed.',
+    responsibilities:[
+      'Store Geofence zones (home, school, custom) per child',
+      'Run haversine distance check on every new location',
+      'Create Alert records (geofence_exit, geofence_entry, sos)',
+      'Push SOS alert to parent via WebSocket (TrackingConsumer)',
+      'Serve alert history to parent app',
+    ],
+    keyFiles:['models.py — Geofence, Alert models','views.py — AlertListView, GeofenceView','utils/geofence.py — haversine_distance(), is_inside_geofence()'],
+    connects:['tracking (consumes each new location)','accounts (alerts belong to a child)','React AlertPanel component'],
+    pillClass:'pill-r',
+  },
+],
+frontend: [
+  {
+    id:'api',
+    label:'api/',
+    icon:'ti-plug',
+    iconBg:'#EEEDFE',iconColor:'#3C3489',
+    purpose:'All communication with the Django backend lives here. One place. Nowhere else in the app makes raw HTTP calls.',
+    why:'Without a dedicated API layer, every component would have its own axios.get() with its own base URL, its own error handling, and its own token logic. When the backend URL changes, you\'d need to hunt through 20 files. Here, you change one file. This is the DRY principle applied to API calls.',
+    responsibilities:[
+      'axiosConfig.js — sets base URL, attaches JWT to every request, auto-refreshes token on 401',
+      'authApi.js — login(), register()',
+      'deviceApi.js — getDevices(), getDevice(id)',
+      'trackingApi.js — getLocationHistory(deviceId)',
+    ],
+    keyFiles:['axiosConfig.js — the shared axios instance','authApi.js','deviceApi.js','trackingApi.js'],
+    connects:['All pages and hooks that need server data','store/ (dispatches data into Redux after fetching)'],
+    pillClass:'pill-p',
+  },
+  {
+    id:'store',
+    label:'store/',
+    icon:'ti-database',
+    iconBg:'#E1F5EE',iconColor:'#085041',
+    purpose:'The single source of truth for the entire React app. Live locations, device list, and auth state all live here.',
+    why:'Imagine 3 components all needing to know "where is device CH123 right now?" Without a store, each would manage their own copy — they\'d go out of sync. With Redux, the WebSocket hook updates one place and every subscribed component re-renders automatically. This is especially critical for live tracking where location changes every 30 seconds.',
+    responsibilities:[
+      'authSlice.js — stores JWT token, handles logout',
+      'trackingSlice.js — holds devices[] and locations{deviceId: {lat,lon,battery}}',
+      'updateLocation action — called by useWebSocket on every new GPS point',
+      'setDevices action — called by Dashboard on mount',
+    ],
+    keyFiles:['index.js — configureStore()','authSlice.js','trackingSlice.js'],
+    connects:['useWebSocket hook (dispatches updateLocation)','Dashboard page (dispatches setDevices)','DeviceCard, LiveMap (read from store)'],
+    pillClass:'pill-t',
+  },
+  {
+    id:'hooks',
+    label:'hooks/',
+    icon:'ti-hook',
+    iconBg:'#FAEEDA',iconColor:'#633806',
+    purpose:'Custom React hooks that encapsulate complex behaviour — WebSocket lifecycle and location state reading.',
+    why:'If you put WebSocket connection logic directly in a component, it runs again on every render and leaks connections. A custom hook runs once, manages cleanup, and exposes a clean interface. useWebSocket is the most important piece of the frontend — it\'s what makes the map move in real time.',
+    responsibilities:[
+      'useWebSocket(deviceId) — opens WS, handles reconnect, dispatches to store',
+      'useLocation(deviceId) — reads current location from Redux store',
+      'Auto-reconnect on disconnect (3s backoff)',
+      'Cleans up WS connection when component unmounts',
+    ],
+    keyFiles:['useWebSocket.js — full WebSocket lifecycle','useLocation.js — selector wrapper'],
+    connects:['store/trackingSlice (dispatches updateLocation)','Dashboard (uses useWebSocket per device)','LiveMap (uses useLocation to get current position)'],
+    pillClass:'pill-a',
+  },
+  {
+    id:'map',
+    label:'components/Map/',
+    icon:'ti-map',
+    iconBg:'#EEEDFE',iconColor:'#3C3489',
+    purpose:'Renders the live Google Map with the child\'s marker and geofence circles.',
+    why:'This is the primary UI parents interact with. LiveMap.jsx reads the current location from the store (via useLocation) and re-renders the marker every time a new GPS point arrives. Without this component, all the tracking data would exist only as JSON — invisible to the parent.',
+    responsibilities:[
+      'LiveMap.jsx — loads Google Maps, places Marker at current location',
+      'GeofenceCircle.jsx — draws a semi-transparent circle for each safe zone',
+      'Centers map on child position automatically',
+      'Uses @react-google-maps/api for the Google Maps integration',
+    ],
+    keyFiles:['LiveMap.jsx','GeofenceCircle.jsx'],
+    connects:['hooks/useLocation (gets live position)','pages/DeviceDetail (renders LiveMap full-screen)','alerts/Geofence data (draws the circles)'],
+    pillClass:'pill-p',
+  },
+  {
+    id:'dashboard',
+    label:'components/Dashboard/',
+    icon:'ti-layout-dashboard',
+    iconBg:'#E1F5EE',iconColor:'#085041',
+    purpose:'Shows a card for each registered device. The parent\'s home screen at a glance.',
+    why:'A parent might have multiple children. DeviceCard shows each device\'s status — child name, battery level, last seen time — without opening the full map. It\'s the summary layer. Clicking it navigates to the full DeviceDetail page.',
+    responsibilities:[
+      'DeviceCard.jsx — displays device name, status, battery from store',
+      'Navigates to /device/:deviceId on click',
+      'Reads live battery + timestamp from Redux (updates in real time)',
+    ],
+    keyFiles:['DeviceCard.jsx'],
+    connects:['store/trackingSlice (reads live location data)','pages/Dashboard (renders a grid of DeviceCards)','pages/DeviceDetail (navigates to on click)'],
+    pillClass:'pill-t',
+  },
+  {
+    id:'common',
+    label:'components/common/',
+    icon:'ti-layout-navbar',
+    iconBg:'#FAEEDA',iconColor:'#633806',
+    purpose:'Reusable structural components — the navbar and route protection.',
+    why:'ProtectedRoute is critical for security — it wraps every authenticated page. Without it, anyone who knows the URL /device/CH123 could open it without logging in. Navbar provides the consistent logout mechanism across all pages.',
+    responsibilities:[
+      'Navbar.jsx — app title + logout button, dispatches logout action',
+      'ProtectedRoute.jsx — checks localStorage for JWT, redirects to /login if missing',
+      'Used by App.jsx to wrap all authenticated routes',
+    ],
+    keyFiles:['Navbar.jsx','ProtectedRoute.jsx'],
+    connects:['App.jsx (ProtectedRoute wraps Dashboard, DeviceDetail)','store/authSlice (Navbar dispatches logout)'],
+    pillClass:'pill-a',
+  },
+  {
+    id:'pages',
+    label:'pages/',
+    icon:'ti-file-stack',
+    iconBg:'#FCEBEB',iconColor:'#791F1F',
+    purpose:'The three screens of the app. Login, the device dashboard, and the full-screen map view.',
+    why:'Pages are the top-level orchestrators. They pull everything together — they call APIs, render components, and manage page-level state. Keeping pages separate from components enforces the rule that components are dumb (they display data passed to them) and pages are smart (they know where to get the data).',
+    responsibilities:[
+      'Login.jsx — form → authApi.login() → dispatch setCredentials → navigate to /',
+      'Dashboard.jsx — fetches devices on mount, renders one DeviceTracker (WS) + DeviceCard per device',
+      'DeviceDetail.jsx — renders LiveMap full-screen + loads location history',
+    ],
+    keyFiles:['Login.jsx','Dashboard.jsx','DeviceDetail.jsx'],
+    connects:['api/ (fetch calls)','store/ (read + write state)','components/ (render everything)','hooks/ (useWebSocket in Dashboard)'],
+    pillClass:'pill-r',
+  },
+]
+};
+
+let currentTab = 'backend';
+let activeId = null;
+
+function pillColor(cls, text) {
+  return `<span class="pill ${cls}">${text}</span>`;
+}
+
+function render(item) {
+  const filesList = item.keyFiles.map(f => `<li>${f}</li>`).join('');
+  const respList = item.responsibilities.map(r => `<li>${r}</li>`).join('');
+  const connChips = item.connects.map(c => `<span class="conn-chip">${c}</span>`).join('');
+  document.getElementById('detail').innerHTML = `
+    <div class="d-header">
+      <div class="d-icon" style="background:${item.iconBg}">
+        <i class="ti ${item.icon}" style="color:${item.iconColor};font-size:20px" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="d-title">${item.label}</div>
+        <div class="d-subtitle">${item.path || item.label}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Purpose</div>
+      <div style="font-size:13px;line-height:1.6;color:var(--color-text-primary)">${item.purpose}</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Why it exists</div>
+      <div class="why-box">${item.why}</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Responsibilities</div>
+      <ul class="resp-list">${respList}</ul>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Key files</div>
+      <div class="pill-row">${item.keyFiles.map(f => `<span class="pill ${item.pillClass}">${f.split('—')[0].trim()}</span>`).join('')}</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Connects to</div>
+      <div class="connects">${connChips}</div>
+    </div>
+  `;
+}
+
+function renderSidebar(tab) {
+  const items = data[tab];
+  document.getElementById('sidebar').innerHTML = items.map(item => `
+    <div class="sitem${item.id===activeId?' active':''}" onclick="select('${item.id}')">
+      <div class="dot"></div>
+      <i class="ti ${item.icon}" style="font-size:14px" aria-hidden="true"></i>
+      <span>${item.label}</span>
+    </div>
+  `).join('');
+}
+
+function select(id) {
+  const items = data[currentTab];
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  activeId = id;
+  renderSidebar(currentTab);
+  render(item);
+}
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  activeId = null;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderSidebar(tab);
+  document.getElementById('detail').innerHTML = `<div class="empty-state"><i class="ti ti-hand-click" style="font-size:28px" aria-hidden="true"></i><span>Select any item to see explanation</span></div>`;
+}
+
+renderSidebar('backend');
+</script>

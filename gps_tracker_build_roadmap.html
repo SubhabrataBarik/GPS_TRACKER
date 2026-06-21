@@ -1,0 +1,499 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.root{display:flex;flex-direction:column}
+.top-tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary)}
+.ttab{padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:all .15s}
+.ttab.active{color:var(--color-text-primary);border-bottom:2px solid #7F77DD}
+.layout{display:flex;min-height:520px}
+.timeline{width:220px;border-right:0.5px solid var(--color-border-tertiary);padding:12px 0;background:var(--color-background-secondary);overflow-y:auto;flex-shrink:0}
+.phase-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;border-left:2px solid transparent;transition:all .12s}
+.phase-btn:hover{background:var(--color-background-primary)}
+.phase-btn.active{background:#EEEDFE;border-left:2px solid #7F77DD}
+.phase-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px}
+.phase-info{display:flex;flex-direction:column;gap:2px}
+.phase-name{font-size:12px;font-weight:500;color:var(--color-text-primary);line-height:1.3}
+.phase-days{font-size:11px;color:var(--color-text-tertiary)}
+.connector{width:2px;height:14px;background:var(--color-border-tertiary);margin-left:24px}
+.panel{flex:1;overflow-y:auto;padding:20px 24px}
+.panel-header{margin-bottom:16px}
+.ph-title{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.ph-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500}
+.badge-days{background:#EEEDFE;color:#3C3489}
+.badge-diff{background:#FAEEDA;color:#633806}
+.badge-diff.hard{background:#FCEBEB;color:#791F1F}
+.badge-diff.easy{background:#E1F5EE;color:#085041}
+.goal-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:13px;color:var(--color-text-primary);line-height:1.6;margin-bottom:16px;border-left:3px solid #7F77DD;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.tasks-header{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:8px}
+.task-list{display:flex;flex-direction:column;gap:4px;margin-bottom:16px}
+.task{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);cursor:pointer;transition:background .1s}
+.task:hover{background:var(--color-background-secondary)}
+.task.done{opacity:.55}
+.task-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--color-border-secondary);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.task.done .task-check{background:#1D9E75;border-color:#1D9E75}
+.check-icon{display:none;color:#fff;font-size:10px}
+.task.done .check-icon{display:block}
+.task-body{flex:1}
+.task-name{font-size:13px;color:var(--color-text-primary);line-height:1.4}
+.task-note{font-size:11px;color:var(--color-text-secondary);margin-top:2px;font-family:var(--font-mono)}
+.cmd-block{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:12px;font-family:var(--font-mono);color:var(--color-text-primary);white-space:pre;overflow-x:auto;margin-bottom:14px;border:0.5px solid var(--color-border-tertiary)}
+.deliverable{font-size:13px;color:var(--color-text-primary);padding:8px 12px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.del-icon{color:#1D9E75;flex-shrink:0}
+.progress-bar-wrap{height:4px;background:var(--color-border-tertiary);border-radius:2px;margin-bottom:20px;overflow:hidden}
+.progress-bar{height:100%;background:#7F77DD;border-radius:2px;transition:width .3s}
+</style>
+
+<h2 class="sr-only">Interactive build roadmap for the GPS tracker Django backend and React frontend</h2>
+
+<div class="root">
+<div class="top-tabs">
+  <button class="ttab active" onclick="switchTab('backend',this)"><i class="ti ti-server" aria-hidden="true"></i> Backend roadmap</button>
+  <button class="ttab" onclick="switchTab('frontend',this)"><i class="ti ti-brand-react" aria-hidden="true"></i> Frontend roadmap</button>
+</div>
+<div style="padding:10px 16px 0;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span style="font-size:12px;color:var(--color-text-secondary)" id="progress-label">0 of 0 tasks done</span>
+    <span style="font-size:12px;color:var(--color-text-tertiary)" id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+</div>
+<div class="layout">
+  <div class="timeline" id="timeline"></div>
+  <div class="panel" id="panel"><div style="padding:40px;text-align:center;color:var(--color-text-tertiary);font-size:13px"><i class="ti ti-hand-click" style="font-size:28px;display:block;margin-bottom:8px" aria-hidden="true"></i>Select a phase to begin</div></div>
+</div>
+</div>
+
+<script>
+const roadmap = {
+backend:[
+  {
+    id:'b1',phase:'Phase 1',name:'Project setup',days:'Day 1–2',diff:'easy',
+    goal:'Get Django running locally with PostgreSQL and Redis. By the end of this phase you should be able to run python manage.py runserver and hit the admin panel.',
+    commands:`# Create and activate virtual environment
+python -m venv venv && source venv/bin/activate
+
+# Install all dependencies
+pip install django djangorestframework django-cors-headers \\
+  channels channels-redis daphne \\
+  djangorestframework-simplejwt \\
+  python-dotenv psycopg2-binary
+
+# Start project
+django-admin startproject config .
+
+# Create app directories
+mkdir -p apps/{accounts,devices,tracking,alerts}
+touch apps/__init__.py
+
+# Start each app
+python manage.py startapp accounts apps/accounts
+python manage.py startapp devices  apps/devices
+python manage.py startapp tracking apps/tracking
+python manage.py startapp alerts   apps/alerts`,
+    tasks:[
+      {name:'Create virtual environment + install packages',note:'requirements.txt committed'},
+      {name:'Create Django project with config/ structure',note:'settings/base.py + dev.py split'},
+      {name:'Configure PostgreSQL in settings',note:'create database gps_tracker in psql first'},
+      {name:'Configure Redis + Channel layers',note:'brew install redis or docker run redis'},
+      {name:'Add all 4 apps to INSTALLED_APPS',note:'include channels and corsheaders too'},
+      {name:'Set up CORS for localhost:5173',note:'CORS_ALLOWED_ORIGINS in settings'},
+      {name:'Run initial migration',note:'python manage.py migrate'},
+      {name:'Open admin panel — confirm it works',note:'python manage.py createsuperuser'},
+    ],
+    deliverables:['Django server running on :8000','Admin panel accessible','PostgreSQL connected','Redis connected'],
+  },
+  {
+    id:'b2',phase:'Phase 2',name:'Accounts app',days:'Day 3–4',diff:'medium',
+    goal:'Parents can register and login. Every subsequent API call will use the JWT token issued here. This phase defines your entire user model — get it right before other apps depend on it.',
+    commands:`# Test registration
+curl -X POST http://localhost:8000/api/auth/register/ \\
+  -H "Content-Type: application/json" \\
+  -d '{"phone":"9876543210","password":"test1234"}'
+
+# Test login — copy the access token
+curl -X POST http://localhost:8000/api/auth/login/ \\
+  -H "Content-Type: application/json" \\
+  -d '{"phone":"9876543210","password":"test1234"}'`,
+    tasks:[
+      {name:'Build Parent model (AbstractUser with phone)',note:'USERNAME_FIELD = phone'},
+      {name:'Build Child model linked to Parent',note:'ForeignKey → Parent, related_name=children'},
+      {name:'Write ParentSerializer + ChildSerializer',note:'nested children in ParentSerializer'},
+      {name:'Build RegisterView (creates Parent + issues JWT)',note:'check phone uniqueness first'},
+      {name:'Build LoginView (authenticate + issue JWT)',note:'use authenticate(username=phone,...)'},
+      {name:'Wire up JWT middleware in settings',note:'SIMPLE_JWT access=1day, refresh=30days'},
+      {name:'Add urls.py → config/urls.py',note:'/api/auth/register/ and /api/auth/login/'},
+      {name:'Test with curl — get access token',note:'save token for next phase tests'},
+    ],
+    deliverables:['POST /api/auth/register/ → returns tokens','POST /api/auth/login/ → returns tokens','JWT token validates on protected routes'],
+  },
+  {
+    id:'b3',phase:'Phase 3',name:'Devices app',days:'Day 5–6',diff:'medium',
+    goal:'The hardware device can now POST its GPS location to your server. This is the most important endpoint — everything flows from here. Simulate the hardware with curl.',
+    commands:`# Create a test device in Django shell
+python manage.py shell
+>>> from apps.devices.models import Device
+>>> Device.objects.create(device_id='CH001', api_key='testkey123')
+
+# Simulate hardware sending GPS data
+curl -X POST http://localhost:8000/api/devices/ingest/ \\
+  -H "X-API-Key: testkey123" \\
+  -H "Content-Type: application/json" \\
+  -d '{"device_id":"CH001","lat":18.5204,"lon":73.8567,"battery":82}'
+
+# List devices (authenticated)
+curl http://localhost:8000/api/devices/ \\
+  -H "Authorization: Bearer <your_access_token>"`,
+    tasks:[
+      {name:'Build Device model (device_id, api_key, child FK)',note:'api_key used instead of JWT for hardware'},
+      {name:'Build DeviceSerializer',note:'include child_name as read-only field'},
+      {name:'Build DeviceIngestView — X-API-Key auth',note:'reject unknown api_key with 401'},
+      {name:'Update last_seen on every ping',note:'save(update_fields=[last_seen]) for efficiency'},
+      {name:'Build DeviceListView — parent sees their devices',note:'filter by child__parent=request.user'},
+      {name:'Wire urls.py',note:'/api/devices/ and /api/devices/ingest/'},
+      {name:'Create test device in Django shell',note:'generate a random api_key'},
+      {name:'Simulate hardware with curl — confirm 200 ok',note:'check DB for new location record'},
+    ],
+    deliverables:['POST /api/devices/ingest/ accepts GPS payload','Device authenticated by X-API-Key header','GET /api/devices/ returns parent\'s devices'],
+  },
+  {
+    id:'b4',phase:'Phase 4',name:'Tracking app',days:'Day 7–9',diff:'hard',
+    goal:'Location is stored AND pushed live via WebSocket. This is the hardest phase — Channels + Redis + WebSocket consumer all working together. Take your time here.',
+    commands:`# Install wscat to test WebSocket
+npm install -g wscat
+
+# Connect to WebSocket (open new terminal)
+wscat -c ws://localhost:8000/ws/tracking/CH001/
+
+# Now simulate hardware in another terminal
+curl -X POST http://localhost:8000/api/devices/ingest/ \\
+  -H "X-API-Key: testkey123" \\
+  -H "Content-Type: application/json" \\
+  -d '{"device_id":"CH001","lat":18.5210,"lon":73.8580,"battery":79}'
+
+# You should see the location appear instantly in wscat output`,
+    tasks:[
+      {name:'Build Location model (device FK, lat, lon, battery, timestamp)',note:'index on device+timestamp for fast queries'},
+      {name:'Create TrackingConsumer (AsyncWebsocketConsumer)',note:'group_name = tracking_{device_id}'},
+      {name:'Set up routing.py with WebSocket URL pattern',note:'ws/tracking/<device_id>/'},
+      {name:'Configure asgi.py with ProtocolTypeRouter',note:'http → Django, websocket → Channels'},
+      {name:'Write broadcast_location() — saves + pushes to WS group',note:'channel_layer.group_send()'},
+      {name:'Call broadcast_location from DeviceIngestView',note:'import and call after saving device'},
+      {name:'Build LocationHistoryView — last 200 points',note:'GET /api/tracking/<id>/history/'},
+      {name:'Start server with daphne (not runserver)',note:'daphne config.asgi:application'},
+      {name:'Test with wscat — see live updates arrive',note:'the moment you curl ingest, wscat shows it'},
+    ],
+    deliverables:['WebSocket ws://localhost:8000/ws/tracking/CH001/ connects','Live location pushed to WS within 1s of ingest','GET /api/tracking/CH001/history/ returns location array'],
+  },
+  {
+    id:'b5',phase:'Phase 5',name:'Alerts app',days:'Day 10–11',diff:'medium',
+    goal:'The system now detects when a child leaves or enters a zone and creates an Alert record. Geofences are drawn by parents in the app and stored here.',
+    commands:`# Create a test geofence in Django shell
+python manage.py shell
+>>> from apps.alerts.models import Geofence
+>>> from apps.accounts.models import Child
+>>> child = Child.objects.first()
+>>> Geofence.objects.create(
+...   child=child, name='Home', type='home',
+...   lat=18.5204, lon=73.8567, radius_meters=150
+... )
+
+# Now send a location OUTSIDE the geofence
+curl -X POST http://localhost:8000/api/devices/ingest/ \\
+  -H "X-API-Key: testkey123" \\
+  -d '{"device_id":"CH001","lat":18.5350,"lon":73.8700,"battery":75}'
+# → Alert record should be created in DB`,
+    tasks:[
+      {name:'Build Geofence model (child, lat, lon, radius, type)',note:'types: home, school, custom'},
+      {name:'Build Alert model (child, alert_type, lat, lon, message)',note:'types: sos, geofence_exit, geofence_entry'},
+      {name:'Write haversine_distance() in utils/geofence.py',note:'returns distance in meters between 2 coords'},
+      {name:'Write check_geofences(location) — called after each ingest',note:'loop all active geofences for the child'},
+      {name:'Create Alert record when boundary crossed',note:'check prev_state vs curr_state to avoid spam'},
+      {name:'Push SOS alert through TrackingConsumer',note:'channel_layer.group_send type=sos_alert'},
+      {name:'Build AlertListView — last 50 alerts for parent',note:'GET /api/alerts/'},
+      {name:'Build GeofenceView — CRUD for geofences',note:'GET + POST /api/alerts/geofences/<child_id>/'},
+      {name:'End-to-end test: ingest outside zone → alert in DB',note:'check Alert.objects.count() increases'},
+    ],
+    deliverables:['Geofence zones created per child','Alert created when device exits zone','SOS pushed via WebSocket','GET /api/alerts/ returns recent alerts'],
+  },
+  {
+    id:'b6',phase:'Phase 6',name:'Hardening + deploy',days:'Day 12–15',diff:'medium',
+    goal:'The backend is production-ready. Errors are handled gracefully, the admin panel is configured, and the server is running on a real domain with HTTPS.',
+    commands:`# Collect static files
+python manage.py collectstatic
+
+# Run with gunicorn (production HTTP)
+gunicorn config.wsgi:application --bind 0.0.0.0:8000
+
+# Run with daphne (WebSocket support)
+daphne -b 0.0.0.0 -p 8001 config.asgi:application
+
+# Or use Docker Compose to run both
+docker-compose up --build`,
+    tasks:[
+      {name:'Add proper error responses (400, 401, 404, 500)',note:'DRF exception handler in settings'},
+      {name:'Configure Django admin for all models',note:'register Device, Location, Alert, Geofence'},
+      {name:'Write production settings.py',note:'DEBUG=False, ALLOWED_HOSTS, secure cookies'},
+      {name:'Create Dockerfile + docker-compose.yml',note:'services: web, daphne, postgres, redis'},
+      {name:'Set up Nginx as reverse proxy',note:'proxy_pass to gunicorn + daphne'},
+      {name:'Deploy to DigitalOcean Droplet or AWS EC2',note:'$6/mo Droplet is enough for 100 users'},
+      {name:'Configure SSL with Let\'s Encrypt (certbot)',note:'wss:// requires HTTPS'},
+      {name:'Run full end-to-end test on live server',note:'curl ingest → wscat → alert created'},
+    ],
+    deliverables:['API running on https://api.yourdomain.com','WebSocket on wss://api.yourdomain.com','Admin panel secured','Docker Compose running'],
+  },
+],
+frontend:[
+  {
+    id:'f1',phase:'Phase 1',name:'Project setup',days:'Day 1',diff:'easy',
+    goal:'Vite + React running locally. Folder structure in place. Environment variables configured. Redux store initialized but empty.',
+    commands:`# Create Vite React project
+npm create vite@latest gps-tracker-frontend -- --template react
+cd gps-tracker-frontend
+
+# Install all dependencies
+npm install axios react-router-dom \\
+  @reduxjs/toolkit react-redux \\
+  @react-google-maps/api lucide-react
+
+npm run dev
+# → http://localhost:5173`,
+    tasks:[
+      {name:'Create Vite React project',note:'--template react (not react-ts for simplicity)'},
+      {name:'Install all dependencies in one go',note:'see package.json from previous phase'},
+      {name:'Create folder structure: api/ hooks/ pages/ components/ store/',note:'empty index.js in each for now'},
+      {name:'Create .env with VITE_API_BASE and VITE_WS_BASE',note:'point to localhost:8000'},
+      {name:'Configure vite.config.js proxy for /api and /ws',note:'avoids CORS issues in dev'},
+      {name:'Set up Redux store with empty slices',note:'configureStore with auth + tracking reducers'},
+      {name:'Wrap App in <Provider store={store}>',note:'in main.jsx'},
+      {name:'Confirm app runs — see default Vite page',note:'will replace shortly'},
+    ],
+    deliverables:['npm run dev shows app on :5173','Redux DevTools shows empty store','.env variables loading correctly'],
+  },
+  {
+    id:'f2',phase:'Phase 2',name:'Auth + routing',days:'Day 2–3',diff:'medium',
+    goal:'Parent can login and land on Dashboard. Protected routes redirect unauthenticated users to /login. JWT stored in localStorage.',
+    commands:`# Test the login flow manually:
+# 1. Open http://localhost:5173/login
+# 2. Enter phone + password from Phase 2 backend
+# 3. After login, check localStorage in DevTools:
+#    Application → Local Storage → access token present
+# 4. Navigate to / — should stay on Dashboard
+# 5. Clear localStorage — should redirect to /login`,
+    tasks:[
+      {name:'Build axiosConfig.js — base URL + JWT interceptor',note:'attach Bearer token to every request'},
+      {name:'Add 401 interceptor — auto refresh token',note:'call /api/auth/token/refresh/ on 401'},
+      {name:'Build authApi.js — login() and register()',note:'simple axios.post wrappers'},
+      {name:'Build authSlice.js — setCredentials + logout actions',note:'stores JWT in state + localStorage'},
+      {name:'Build Login.jsx page',note:'phone + password inputs → authApi.login() → dispatch → navigate'},
+      {name:'Build ProtectedRoute.jsx',note:'check localStorage.access — redirect to /login if missing'},
+      {name:'Set up App.jsx with React Router',note:'/ → Dashboard (protected), /login → Login'},
+      {name:'Test full login → redirect → logout cycle',note:'use your backend from Phase 2'},
+    ],
+    deliverables:['Login page works with real backend','JWT stored after login','Unauthenticated users redirected to /login','Logout clears token + redirects'],
+  },
+  {
+    id:'f3',phase:'Phase 3',name:'Device dashboard',days:'Day 4–5',diff:'easy',
+    goal:'Parent sees all their registered devices on a card grid. Battery level, name, and status visible. This is the home screen.',
+    commands:`# Make sure backend has a device linked to your test child
+# Django shell:
+python manage.py shell
+>>> from apps.accounts.models import Child
+>>> from apps.devices.models import Device
+>>> child = Child.objects.first()
+>>> Device.objects.create(device_id='CH001',api_key='key1',child=child)
+
+# Then open http://localhost:5173 after logging in
+# You should see a DeviceCard for CH001`,
+    tasks:[
+      {name:'Build deviceApi.js — getDevices()',note:'GET /api/devices/ with auth'},
+      {name:'Build trackingSlice.js — setDevices + updateLocation',note:'locations keyed by device_id'},
+      {name:'Build Dashboard.jsx — fetch devices on mount',note:'useEffect → getDevices → dispatch setDevices'},
+      {name:'Build DeviceCard.jsx — display name, status, battery',note:'reads from Redux store'},
+      {name:'Build Navbar.jsx — app title + logout',note:'dispatch logout() on click'},
+      {name:'Render device cards in a responsive grid',note:'CSS grid auto-fit minmax(240px,1fr)'},
+      {name:'Add loading + empty states',note:'"No devices registered yet" if array empty'},
+      {name:'Confirm cards appear with your test device',note:'name should show child name from backend'},
+    ],
+    deliverables:['Dashboard shows device cards','Cards display device_id + child name','Logout works from Navbar'],
+  },
+  {
+    id:'f4',phase:'Phase 4',name:'Live WebSocket tracking',days:'Day 6–8',diff:'hard',
+    goal:'This is the hardest frontend phase. The useWebSocket hook connects, receives location updates, and pushes them into Redux — all while the parent watches the battery percentage update in real time on DeviceCard.',
+    commands:`# Open the app on Dashboard
+# In a SEPARATE terminal, simulate hardware:
+curl -X POST http://localhost:8000/api/devices/ingest/ \\
+  -H "X-API-Key: key1" \\
+  -H "Content-Type: application/json" \\
+  -d '{"device_id":"CH001","lat":18.5204,"lon":73.8567,"battery":80}'
+
+# Watch DeviceCard on screen — battery should update
+# Open Redux DevTools — tracking.locations.CH001 should appear
+# Every curl you run = one map update`,
+    tasks:[
+      {name:'Build useWebSocket.js hook',note:'new WebSocket(wss://...) inside useCallback'},
+      {name:'Parse incoming JSON message by type field',note:'"location" → dispatch updateLocation, "sos" → alert()'},
+      {name:'Add auto-reconnect with 3s setTimeout',note:'ws.current.onclose = () => setTimeout(connect, 3000)'},
+      {name:'Clean up WebSocket on component unmount',note:'return () => ws.current?.close()'},
+      {name:'Build useLocation.js — selector from Redux',note:'useSelector(state => state.tracking.locations[deviceId])'},
+      {name:'Add DeviceTracker wrapper in Dashboard',note:'renders useWebSocket per device, returns null'},
+      {name:'Confirm Redux DevTools shows locations updating',note:'trigger with curl ingest from backend'},
+      {name:'Confirm DeviceCard battery updates without page refresh',note:'battery % should change live'},
+    ],
+    deliverables:['useWebSocket connects to Django Channels','New GPS ping updates Redux in real time','DeviceCard shows live battery %','Auto-reconnects if WS drops'],
+  },
+  {
+    id:'f5',phase:'Phase 5',name:'Live map',days:'Day 9–11',diff:'medium',
+    goal:'Parent clicks a device card → full-screen map → child marker moves in real time. Geofence circles drawn. Route history loaded on open.',
+    commands:`# Get a Google Maps API key:
+# console.cloud.google.com → Maps JavaScript API → enable
+# Add to .env: VITE_GOOGLE_MAPS_KEY=your_key_here
+
+# Test route history:
+curl http://localhost:8000/api/tracking/CH001/history/ \\
+  -H "Authorization: Bearer <token>"
+# Should return array of lat/lon points`,
+    tasks:[
+      {name:'Enable Maps JavaScript API in Google Cloud Console',note:'also enable Places API for future'},
+      {name:'Add VITE_GOOGLE_MAPS_KEY to .env',note:'never commit this key — add .env to .gitignore'},
+      {name:'Build LiveMap.jsx with useJsApiLoader',note:'center map on current location from useLocation'},
+      {name:'Add Marker that moves as Redux location updates',note:'marker position = {lat,lng} from store'},
+      {name:'Build GeofenceCircle.jsx — draw Circle for each zone',note:'radius from geofence.radius_meters'},
+      {name:'Build DeviceDetail.jsx page',note:'useParams for deviceId → render LiveMap full-screen'},
+      {name:'Build trackingApi.js — getLocationHistory()',note:'GET /api/tracking/<id>/history/'},
+      {name:'Load and display route history on DeviceDetail mount',note:'draw Polyline through history points'},
+    ],
+    deliverables:['Click DeviceCard → opens full-screen map','Child marker visible on map','Marker moves when hardware sends new location','Geofence circles drawn','Route history loaded as polyline'],
+  },
+  {
+    id:'f6',phase:'Phase 6',name:'Alerts + polish',days:'Day 12–15',diff:'medium',
+    goal:'Alerts panel shows recent events. SOS shows an immediate notification. App works on mobile. Loading states and error handling make it production-ready.',
+    commands:`# Test SOS via curl:
+curl -X POST http://localhost:8000/api/devices/ingest/ \\
+  -H "X-API-Key: key1" \\
+  -d '{"device_id":"CH001","lat":18.52,"lon":73.86,"battery":15,"sos":true}'
+
+# Should trigger an alert() in browser immediately
+# Check alerts list via API:
+curl http://localhost:8000/api/alerts/ \\
+  -H "Authorization: Bearer <token>"`,
+    tasks:[
+      {name:'Build AlertPanel.jsx — fetch + display alerts list',note:'GET /api/alerts/ on mount'},
+      {name:'Show SOS alert as browser notification or modal',note:'ws message type=sos triggers it immediately'},
+      {name:'Add error boundaries around LiveMap',note:'catch Google Maps load failures gracefully'},
+      {name:'Add loading skeletons on Dashboard + DeviceDetail',note:'show while API calls are in flight'},
+      {name:'Make layout responsive for mobile (375px)',note:'stack columns, enlarge touch targets'},
+      {name:'Handle token expiry gracefully',note:'axiosConfig interceptor already handles — test it'},
+      {name:'Add favicon + page title',note:'<title>GPS Tracker</title> per page'},
+      {name:'End-to-end test: login → dashboard → map → alert',note:'do the full parent flow start to finish'},
+    ],
+    deliverables:['Alert list visible in sidebar or panel','SOS notification fires immediately via WS','App usable on mobile screen','All loading + error states handled','Full parent flow works end-to-end'],
+  },
+]
+};
+
+const done = {};
+let currentTab = 'backend';
+let activePhase = null;
+
+function totalTasks(tab) {
+  return roadmap[tab].reduce((s,p) => s + p.tasks.length, 0);
+}
+function doneTasks(tab) {
+  return roadmap[tab].reduce((s,p) =>
+    s + p.tasks.filter((_,i) => done[p.id+'_'+i]).length, 0);
+}
+function updateProgress() {
+  const total = totalTasks(currentTab);
+  const d = doneTasks(currentTab);
+  const pct = total ? Math.round(d/total*100) : 0;
+  document.getElementById('progress-label').textContent = `${d} of ${total} tasks done`;
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-bar').style.width = pct+'%';
+}
+
+function toggleTask(phaseId, idx) {
+  const key = phaseId+'_'+idx;
+  done[key] = !done[key];
+  updateProgress();
+  renderPanel(roadmap[currentTab].find(p=>p.id===phaseId));
+}
+
+function diffBadge(d) {
+  if(d==='easy') return '<span class="badge badge-diff easy">Easy</span>';
+  if(d==='hard') return '<span class="badge badge-diff hard">Hard</span>';
+  return '<span class="badge badge-diff">Medium</span>';
+}
+
+function renderPanel(phase) {
+  const taskHtml = phase.tasks.map((t,i) => {
+    const key = phase.id+'_'+i;
+    const isDone = done[key];
+    return `<div class="task${isDone?' done':''}" onclick="toggleTask('${phase.id}',${i})" role="checkbox" aria-checked="${isDone}" tabindex="0">
+      <div class="task-check"><i class="ti ti-check check-icon" aria-hidden="true"></i></div>
+      <div class="task-body">
+        <div class="task-name">${t.name}</div>
+        <div class="task-note">${t.note}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const delHtml = phase.deliverables.map(d =>
+    `<div class="deliverable"><i class="ti ti-circle-check del-icon" aria-hidden="true"></i>${d}</div>`
+  ).join('');
+
+  document.getElementById('panel').innerHTML = `
+    <div class="panel-header">
+      <div class="ph-title">${phase.phase}: ${phase.name}</div>
+      <div class="ph-meta" style="margin-top:6px">
+        <span class="badge badge-days">${phase.days}</span>
+        ${diffBadge(phase.diff)}
+      </div>
+    </div>
+    <div class="goal-box">${phase.goal}</div>
+    <div class="tasks-header">Tasks — click to check off</div>
+    <div class="task-list">${taskHtml}</div>
+    <div class="tasks-header">Setup commands</div>
+    <div class="cmd-block">${phase.commands.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    <div class="tasks-header">Phase deliverables</div>
+    ${delHtml}
+  `;
+}
+
+function renderTimeline(tab) {
+  const phases = roadmap[tab];
+  document.getElementById('timeline').innerHTML = phases.map((p,i) => `
+    ${i>0?'<div class="connector"></div>':''}
+    <button class="phase-btn${p.id===activePhase?' active':''}" onclick="selectPhase('${p.id}')">
+      <div class="phase-num" style="background:${p.id===activePhase?'#7F77DD':'var(--color-border-tertiary)'};color:${p.id===activePhase?'#fff':'var(--color-text-secondary)'}">
+        ${i+1}
+      </div>
+      <div class="phase-info">
+        <div class="phase-name">${p.name}</div>
+        <div class="phase-days">${p.days}</div>
+      </div>
+    </button>
+  `).join('');
+}
+
+function selectPhase(id) {
+  activePhase = id;
+  const phase = roadmap[currentTab].find(p=>p.id===id);
+  renderTimeline(currentTab);
+  renderPanel(phase);
+}
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  activePhase = null;
+  document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTimeline(tab);
+  updateProgress();
+  document.getElementById('panel').innerHTML = `<div style="padding:40px;text-align:center;color:var(--color-text-tertiary);font-size:13px"><i class="ti ti-hand-click" style="font-size:28px;display:block;margin-bottom:8px" aria-hidden="true"></i>Select a phase to begin</div>`;
+}
+
+renderTimeline('backend');
+updateProgress();
+</script>
