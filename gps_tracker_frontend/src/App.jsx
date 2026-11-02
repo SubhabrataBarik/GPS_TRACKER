@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import DeviceDetail from './pages/DeviceDetail'
 import ChangePassword from './pages/ChangePassword'
+import DeviceSimulator from './pages/DeviceSimulator'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/simulate/:deviceId" element={<DeviceSimulator />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Dashboard />} />
