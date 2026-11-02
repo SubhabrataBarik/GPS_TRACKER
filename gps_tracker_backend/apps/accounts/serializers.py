@@ -92,6 +92,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "password",
         ]
 
+    def validate_phone(self, value):
+
+        if User.objects.filter(phone=value).exists():
+            raise serializers.ValidationError(
+                "Phone number already registered"
+            )
+
+        return value
+
     def validate_email(self, value):
 
         if value:
