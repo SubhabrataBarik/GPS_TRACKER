@@ -1,3 +1,5 @@
 export { default as ProtectedRoute } from './ProtectedRoute'
+export { default as Navbar } from './Navbar'
+export { default as DeviceCard } from './DeviceCard'
 
-// Dashboard/Map/common components will be added here in Phase 3
+// Map components will be added here in Phase 4
