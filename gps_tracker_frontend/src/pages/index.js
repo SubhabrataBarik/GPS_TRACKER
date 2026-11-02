@@ -1,1 +1,2 @@
-// Pages will be added here in Phase 2
+export { default as Login } from './Login'
+export { default as Dashboard } from './Dashboard'

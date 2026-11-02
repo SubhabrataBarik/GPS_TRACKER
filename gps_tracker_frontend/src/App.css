@@ -1,3 +1,140 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  gap: 16px;
+}
+
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  background: radial-gradient(
+    circle at 50% 0%,
+    var(--accent-bg),
+    transparent 60%
+  );
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 28px;
+
+  h1 {
+    font-size: 26px;
+    margin: 0 0 6px;
+  }
+}
+
+.auth-subtitle {
+  color: var(--text);
+  font-size: 14px;
+  margin: 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-h);
+  }
+
+  input {
+    font: inherit;
+    font-size: 15px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-h);
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+  }
+
+  button {
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 11px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.05s;
+
+    &:hover:not(:disabled) {
+      opacity: 0.92;
+    }
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.phone-input-group {
+  display: flex;
+  gap: 8px;
+
+  .country-code-input {
+    width: 56px;
+    flex: none;
+    text-align: center;
+  }
+
+  .phone-number-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.auth-error {
+  background: rgba(211, 51, 51, 0.1);
+  border: 1px solid rgba(211, 51, 51, 0.3);
+  color: #d33;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 0;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;

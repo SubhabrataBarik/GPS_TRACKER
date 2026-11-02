@@ -1,1 +1,2 @@
-// API modules will be added here in Phase 2
+export { default as axiosInstance } from './axiosConfig'
+export * from './authApi'
