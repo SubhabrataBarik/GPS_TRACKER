@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.tracking.utils import broadcast_location
+
 from .authentication import DeviceAPIKeyAuthentication
 from .models import Device
 from .serializers import DeviceSerializer, DeviceIngestSerializer
@@ -42,6 +44,14 @@ class DeviceIngestView(APIView):
         device.battery = data["battery"]
         device.last_seen = timezone.now()
         device.save(update_fields=["battery", "last_seen"])
+
+        broadcast_location(
+            device=device,
+            lat=data["lat"],
+            lon=data["lon"],
+            battery=data["battery"],
+            sos=data.get("sos", False),
+        )
 
         return Response(
             {
