@@ -20,3 +20,7 @@ class TrackingConsumer(AsyncWebsocketConsumer):
     async def location_update(self, event):
 
         await self.send(text_data=json.dumps(event["data"]))
+
+    async def sos_alert(self, event):
+
+        await self.send(text_data=json.dumps(event["data"]))

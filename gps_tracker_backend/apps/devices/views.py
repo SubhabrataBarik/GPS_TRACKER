@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.alerts.services import check_geofences, create_sos_alert
 from apps.tracking.utils import broadcast_location
 
 from .authentication import DeviceAPIKeyAuthentication
@@ -45,13 +46,17 @@ class DeviceIngestView(APIView):
         device.last_seen = timezone.now()
         device.save(update_fields=["battery", "last_seen"])
 
-        broadcast_location(
+        location = broadcast_location(
             device=device,
             lat=data["lat"],
             lon=data["lon"],
             battery=data["battery"],
-            sos=data.get("sos", False),
         )
+
+        check_geofences(location)
+
+        if data.get("sos", False):
+            create_sos_alert(location)
 
         return Response(
             {

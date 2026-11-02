@@ -4,7 +4,7 @@ from channels.layers import get_channel_layer
 from .models import Location
 
 
-def broadcast_location(device, lat, lon, battery, sos=False):
+def broadcast_location(device, lat, lon, battery):
 
     location = Location.objects.create(
         device=device,
@@ -14,25 +14,20 @@ def broadcast_location(device, lat, lon, battery, sos=False):
     )
 
     channel_layer = get_channel_layer()
-    group_name = f"tracking_{device.device_id}"
-
-    payload = {
-        "device_id": device.device_id,
-        "lat": lat,
-        "lon": lon,
-        "battery": battery,
-        "timestamp": location.timestamp.isoformat(),
-    }
 
     async_to_sync(channel_layer.group_send)(
-        group_name,
-        {"type": "location.update", "data": {**payload, "type": "location"}},
+        f"tracking_{device.device_id}",
+        {
+            "type": "location.update",
+            "data": {
+                "type": "location",
+                "device_id": device.device_id,
+                "lat": lat,
+                "lon": lon,
+                "battery": battery,
+                "timestamp": location.timestamp.isoformat(),
+            },
+        },
     )
-
-    if sos:
-        async_to_sync(channel_layer.group_send)(
-            group_name,
-            {"type": "location.update", "data": {**payload, "type": "sos"}},
-        )
 
     return location
