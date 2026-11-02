@@ -2,5 +2,5 @@ export { default as ProtectedRoute } from './ProtectedRoute'
 export { default as Navbar } from './Navbar'
 export { default as DeviceCard } from './DeviceCard'
 export { default as DeviceTracker } from './DeviceTracker'
-
-// Map components will be added here in a later phase
+export { default as LiveMap } from './LiveMap'
+export { default as GeofenceCircle } from './GeofenceCircle'

@@ -1,12 +1,13 @@
 import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 
-import { useLocation } from '../hooks/useLocation'
+import { useLocation as useDeviceLocation } from '../hooks/useLocation'
 
 function DeviceCard({ deviceId }) {
   const device = useSelector((state) =>
     state.tracking.devices.find((d) => d.device_id === deviceId),
   )
-  const location = useLocation(deviceId)
+  const location = useDeviceLocation(deviceId)
 
   if (!device) return null
 
@@ -14,7 +15,7 @@ function DeviceCard({ deviceId }) {
   const lastSeen = location?.timestamp ?? device.last_seen
 
   return (
-    <div className="device-card">
+    <Link to={`/devices/${device.device_id}`} className="device-card">
       <div className="device-card-header">
         <h2>{device.child_name}</h2>
         <span className={`device-status-badge device-status-${device.status}`}>
@@ -34,7 +35,7 @@ function DeviceCard({ deviceId }) {
           Last seen {new Date(lastSeen).toLocaleString()}
         </p>
       )}
-    </div>
+    </Link>
   )
 }
 

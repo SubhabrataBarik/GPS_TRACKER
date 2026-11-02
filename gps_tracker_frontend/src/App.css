@@ -64,11 +64,64 @@
   flex-direction: column;
   gap: 10px;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 20px;
   box-shadow: var(--shadow);
+  transition: box-shadow 0.15s, transform 0.1s;
+
+  &:hover {
+    box-shadow: 0 0 0 2px var(--accent);
+    transform: translateY(-1px);
+  }
+}
+
+.device-detail-page {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.device-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  box-sizing: border-box;
+  flex: none;
+
+  h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+}
+
+.device-detail-back {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--accent-bg);
+  }
+}
+
+.device-detail-map {
+  flex: 1;
+  min-height: 0;
 }
 
 .device-card-header {
