@@ -14,20 +14,25 @@ def broadcast_location(device, lat, lon, battery, sos=False):
     )
 
     channel_layer = get_channel_layer()
+    group_name = f"tracking_{device.device_id}"
+
+    payload = {
+        "device_id": device.device_id,
+        "lat": lat,
+        "lon": lon,
+        "battery": battery,
+        "timestamp": location.timestamp.isoformat(),
+    }
 
     async_to_sync(channel_layer.group_send)(
-        f"tracking_{device.device_id}",
-        {
-            "type": "location.update",
-            "data": {
-                "device_id": device.device_id,
-                "lat": lat,
-                "lon": lon,
-                "battery": battery,
-                "sos": sos,
-                "timestamp": location.timestamp.isoformat(),
-            },
-        },
+        group_name,
+        {"type": "location.update", "data": {**payload, "type": "location"}},
     )
+
+    if sos:
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {"type": "location.update", "data": {**payload, "type": "sos"}},
+        )
 
     return location

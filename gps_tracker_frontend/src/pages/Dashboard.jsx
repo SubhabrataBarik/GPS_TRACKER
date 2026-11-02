@@ -5,6 +5,7 @@ import { getDevices } from '../api/deviceApi'
 import { setDevices } from '../store/trackingSlice'
 import Navbar from '../components/Navbar'
 import DeviceCard from '../components/DeviceCard'
+import DeviceTracker from '../components/DeviceTracker'
 
 function Dashboard() {
   const dispatch = useDispatch()
@@ -47,11 +48,17 @@ function Dashboard() {
         )}
 
         {!loading && !error && devices.length > 0 && (
-          <div className="device-grid">
+          <>
             {devices.map((device) => (
-              <DeviceCard key={device.device_id} deviceId={device.device_id} />
+              <DeviceTracker key={device.device_id} deviceId={device.device_id} />
             ))}
-          </div>
+
+            <div className="device-grid">
+              {devices.map((device) => (
+                <DeviceCard key={device.device_id} deviceId={device.device_id} />
+              ))}
+            </div>
+          </>
         )}
       </main>
     </div>
