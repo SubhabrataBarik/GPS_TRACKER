@@ -17,6 +17,7 @@ from .serializers import (
     UserSerializer,
     UserRegistrationSerializer,
     UserUpdateSerializer,
+    ChangePasswordSerializer,
 )
 
 
@@ -161,6 +162,32 @@ class ProfileView(APIView):
             {
                 "message": "Profile updated successfully",
                 "user": serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+# =========================================================
+# CHANGE PASSWORD VIEW
+# =========================================================
+
+class ChangePasswordView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        serializer = ChangePasswordSerializer(
+            data=request.data,
+            context={"request": request},
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "message": "Password changed successfully"
             },
             status=status.HTTP_200_OK
         )

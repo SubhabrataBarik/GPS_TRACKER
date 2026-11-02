@@ -160,6 +160,41 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 # ==========================================
+# CHANGE PASSWORD SERIALIZER
+# ==========================================
+
+class ChangePasswordSerializer(serializers.Serializer):
+
+    old_password = serializers.CharField(write_only=True)
+
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"}
+    )
+
+    def validate_old_password(self, value):
+
+        user = self.context["request"].user
+
+        if not user.check_password(value):
+            raise serializers.ValidationError(
+                "Old password is incorrect"
+            )
+
+        return value
+
+    def save(self):
+
+        user = self.context["request"].user
+
+        user.set_password(self.validated_data["new_password"])
+        user.save(update_fields=["password"])
+
+        return user
+
+
+# ==========================================
 # CHILD CREATE/UPDATE SERIALIZER
 # ==========================================
 

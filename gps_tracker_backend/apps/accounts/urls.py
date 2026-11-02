@@ -6,6 +6,7 @@ from .views import (
     LogoutView,
     ProfileView,
     RefreshTokenView,
+    ChangePasswordView,
 )
 
 app_name = "accounts"
@@ -43,5 +44,11 @@ urlpatterns = [
         "profile/",
         ProfileView.as_view(),
         name="profile",
+    ),
+
+    path(
+        "change-password/",
+        ChangePasswordView.as_view(),
+        name="change_password",
     ),
 ]

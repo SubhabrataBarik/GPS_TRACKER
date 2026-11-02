@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { logout } from '../store/authSlice'
 
@@ -15,9 +15,14 @@ function Navbar() {
   return (
     <nav className="navbar">
       <span className="navbar-title">GPS Tracker</span>
-      <button className="navbar-logout" onClick={handleLogout}>
-        Logout
-      </button>
+      <div className="navbar-actions">
+        <Link to="/change-password" className="navbar-link">
+          Change Password
+        </Link>
+        <button className="navbar-logout" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
     </nav>
   )
 }
