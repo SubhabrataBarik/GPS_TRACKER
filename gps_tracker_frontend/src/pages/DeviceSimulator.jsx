@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
 
-const MIN_SEND_INTERVAL_MS = 4000
+const DEFAULT_SEND_INTERVAL_MS = 60000
 
 function DeviceSimulator() {
   const { deviceId } = useParams()
@@ -14,9 +14,12 @@ function DeviceSimulator() {
   const [sharing, setSharing] = useState(false)
   const [lastPing, setLastPing] = useState(null)
   const [error, setError] = useState('')
+  const [pingMode, setPingMode] = useState(null)
+  const [nextPingSeconds, setNextPingSeconds] = useState(null)
 
   const watchIdRef = useRef(null)
   const lastSentAtRef = useRef(0)
+  const sendIntervalMsRef = useRef(DEFAULT_SEND_INTERVAL_MS)
 
   useEffect(() => {
     return () => {
@@ -28,13 +31,19 @@ function DeviceSimulator() {
 
   const sendPing = async (lat, lon) => {
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${import.meta.env.VITE_API_BASE}/devices/ingest/`,
         { device_id: deviceId, lat, lon, battery: Number(battery) },
         { headers: { 'X-API-Key': apiKey } },
       )
       setLastPing({ lat, lon, time: new Date().toLocaleTimeString() })
       setError('')
+
+      if (data.next_ping_in_seconds) {
+        sendIntervalMsRef.current = data.next_ping_in_seconds * 1000
+        setPingMode(data.ping_mode)
+        setNextPingSeconds(data.next_ping_in_seconds)
+      }
     } catch (err) {
       setError(
         err.response?.data?.detail ||
@@ -61,7 +70,7 @@ function DeviceSimulator() {
     const id = navigator.geolocation.watchPosition(
       (position) => {
         const now = Date.now()
-        if (now - lastSentAtRef.current < MIN_SEND_INTERVAL_MS) return
+        if (now - lastSentAtRef.current < sendIntervalMsRef.current) return
         lastSentAtRef.current = now
         sendPing(position.coords.latitude, position.coords.longitude)
       },
@@ -94,6 +103,11 @@ function DeviceSimulator() {
           {lastPing && (
             <p className="auth-success">
               Sent {lastPing.lat.toFixed(5)}, {lastPing.lon.toFixed(5)} at {lastPing.time}
+            </p>
+          )}
+          {pingMode && (
+            <p className="auth-subtitle">
+              Mode: {pingMode} (~{nextPingSeconds}s between pings)
             </p>
           )}
 

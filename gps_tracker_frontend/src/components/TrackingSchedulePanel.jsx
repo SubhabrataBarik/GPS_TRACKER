@@ -5,6 +5,8 @@ import { getTrackingSchedule, updateTrackingSchedule } from '../api/deviceApi'
 function TrackingSchedulePanel({ deviceId }) {
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('20:00')
+  const [pingMode, setPingMode] = useState('normal')
+  const [pingModeOptions, setPingModeOptions] = useState({})
   const [hoursPerDay, setHoursPerDay] = useState(null)
   const [estimatedCost, setEstimatedCost] = useState(null)
   const [ratePerHour, setRatePerHour] = useState(null)
@@ -16,6 +18,8 @@ function TrackingSchedulePanel({ deviceId }) {
   const applySchedule = (data) => {
     setStartTime(data.start_time.slice(0, 5))
     setEndTime(data.end_time.slice(0, 5))
+    setPingMode(data.ping_mode)
+    setPingModeOptions(data.ping_mode_options)
     setHoursPerDay(data.hours_per_day)
     setEstimatedCost(data.estimated_daily_cost)
     setRatePerHour(data.rate_per_hour)
@@ -50,6 +54,7 @@ function TrackingSchedulePanel({ deviceId }) {
       const { data } = await updateTrackingSchedule(deviceId, {
         start_time: startTime,
         end_time: endTime,
+        ping_mode: pingMode,
       })
       applySchedule(data)
       setSuccess(true)
@@ -94,6 +99,27 @@ function TrackingSchedulePanel({ deviceId }) {
             required
           />
         </label>
+      </div>
+
+      <div className="schedule-mode-group">
+        {Object.entries(pingModeOptions).map(([key, option]) => (
+          <label
+            key={key}
+            className={`schedule-mode-option${pingMode === key ? ' schedule-mode-option-selected' : ''}`}
+          >
+            <input
+              type="radio"
+              name="ping_mode"
+              value={key}
+              checked={pingMode === key}
+              onChange={() => setPingMode(key)}
+            />
+            <span className="schedule-mode-label">{option.label}</span>
+            <span className="schedule-mode-range">
+              {option.min_seconds}–{option.max_seconds}s
+            </span>
+          </label>
+        ))}
       </div>
 
       <div className="schedule-summary">
