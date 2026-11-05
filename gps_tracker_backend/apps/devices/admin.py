@@ -1,6 +1,26 @@
 from django.contrib import admin
 
-from .models import Device
+from .models import Device, TrackingSchedule
+
+
+@admin.register(TrackingSchedule)
+class TrackingScheduleAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "device",
+        "start_time",
+        "end_time",
+        "hours_per_day",
+        "estimated_daily_cost",
+        "ping_mode",
+        "is_active",
+    )
+
+    list_filter = ("is_active", "ping_mode")
+
+    search_fields = ("device__device_id",)
+
+    readonly_fields = ("updated_at",)
 
 
 @admin.register(Device)

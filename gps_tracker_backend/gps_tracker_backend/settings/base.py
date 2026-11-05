@@ -188,6 +188,12 @@ SIMPLE_JWT = {
 }
 
 
+# Tracking plan billing
+# Rate charged per hour of daily tracking window selected by the parent.
+
+TRACKING_RATE_PER_HOUR = 5.0
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 

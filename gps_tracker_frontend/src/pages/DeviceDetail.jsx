@@ -6,6 +6,7 @@ import { getLocationHistory } from '../api/trackingApi'
 import { getGeofences } from '../api/geofenceApi'
 import DeviceTracker from '../components/DeviceTracker'
 import LiveMap from '../components/LiveMap'
+import TrackingSchedulePanel from '../components/TrackingSchedulePanel'
 
 function DeviceDetail() {
   const { deviceId } = useParams()
@@ -18,6 +19,7 @@ function DeviceDetail() {
   const [history, setHistory] = useState([])
   const [geofences, setGeofences] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showSchedule, setShowSchedule] = useState(false)
 
   useEffect(() => {
     if (!device) return undefined
@@ -57,6 +59,12 @@ function DeviceDetail() {
           ← Back
         </button>
         <h1>{device.child_name}</h1>
+        <button
+          className="device-detail-back"
+          onClick={() => setShowSchedule((value) => !value)}
+        >
+          {showSchedule ? 'Hide Schedule' : 'Tracking Schedule'}
+        </button>
       </header>
 
       <div className="device-detail-map">
@@ -64,6 +72,12 @@ function DeviceDetail() {
           <p className="dashboard-status">Loading map…</p>
         ) : (
           <LiveMap deviceId={deviceId} geofences={geofences} history={history} />
+        )}
+
+        {showSchedule && (
+          <div className="schedule-overlay">
+            <TrackingSchedulePanel deviceId={deviceId} />
+          </div>
         )}
       </div>
     </div>
